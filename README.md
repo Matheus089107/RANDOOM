@@ -6,15 +6,27 @@ Bem-vindo ao **RANDOOM**, um projeto de tiro em primeira pessoa inspirado no cl�
 
 ---
 
-## 👤 Desenvolvedor
-Este projeto foi idealizado e desenvolvido por **Matheus**. O objetivo foi criar uma experiência de FPS retrô performática tanto em Python quanto em C++.
+## 👥 Desenvolvedores
 
-## 🎮 O Jogo
-O **RANDOOM** é uma evolução do motor raycaster original. O jogo principal está totalmente funcional, com múltiplos níveis, chefes, sistemas de armas e itens.
+-   **Matheus**: Idealização, lógica do motor, renderização e gráficos.
+-   **Eduardo**: Direção de arte, criação de personagens, imagens e assets visuais.
+
+---
+
+## 🎮 Mecânicas do Jogo
+
+O **RANDOOM** oferece uma progressão de níveis desafiadora com as seguintes mecânicas:
+
+-   **Progressão por Portal**: Para avançar de nível, você deve encontrar o portal. Ele só será ativado após você coletar a **chave**.
+-   **O Sistema de Chave**: Em cada nível, o **último inimigo vivo** (ou o chefe) deixará cair a chave do portal ao morrer. Fique atento ao local da última baixa!
+-   **Arsenal Progressivo**:
+    -   Você inicia sua jornada apenas com a **Pistola**.
+    -   A **Escopeta** é desbloqueada automaticamente ao atingir o **Nível 4**.
+-   **Itens**: Procure por kits médicos (+30 HP) e granadas espalhados pelo mapa para sobreviver às hordas.
 
 ### 🌐 Modo Online (Multijogador)
 > [!IMPORTANT]
-> O modo online ainda está em fase de ajuste e desenvolvimento. Existe uma chance de funcionar, mas instabilidades podem ocorrer. Estamos trabalhando para estabilizar a conexão entre os jogadores!
+> O modo online ainda está em fase de ajuste. Existe uma chance de funcionar, mas instabilidades podem ocorrer. Estamos trabalhando para estabilizar a conexão entre os jogadores!
 
 ---
 
@@ -26,9 +38,9 @@ O **RANDOOM** é uma evolução do motor raycaster original. O jogo principal es
 | **Mouse** | Olhar ao redor / Mirar |
 | **Clique Esquerdo** | Atirar |
 | **Espaço** | Lançar Granada |
-| **TAB** | Usar Kit Médico (Cura +30 HP) |
+| **TAB** | Usar Kit Médico |
 | **Shift** | Correr |
-| **1 / 2** | Trocar de Arma (Pistola / Escopeta) |
+| **1 / 2** | Trocar de Arma (Pistola / Escopeta - Nível 4+) |
 | **M** | Travar/Destravar o Mouse (Útil para a versão web) |
 | **ESC** | Abrir Menu / Sair |
 
@@ -50,4 +62,4 @@ python main.py
 ```
 
 ---
-Desenvolvido com foco em performance e estética premium.
+Desenvolvido com foco em performance e estética premium por Matheus & Eduardo.
