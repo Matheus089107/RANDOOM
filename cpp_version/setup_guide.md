@@ -1,6 +1,6 @@
-# 🛠️ Guia de Transição: Python -> C++ (Raylib)
+# 🛠️ Guia de Transição: Python -> C++ (Raylib 3D)
 
-Você decidiu subir de nível! C++ é a linguagem dos deuses do desenvolvimento de jogos, e a **Raylib** é a ferramenta perfeita para essa missão. Abaixo está o que você precisa para rodar o código que eu acabei de criar.
+O seu motor agora é um **Motor 3D Real**. Em vez de apenas simular profundidade, estamos usando o pipeline 3D completo da Raylib.
 
 ## 1. Instalando o Compilador (Windows)
 
@@ -19,24 +19,23 @@ Como você está no Windows, recomendo usar o **MinGW-w64** ou o **Visual Studio
 ## 2. Instalando a Raylib
 
 A Raylib é a biblioteca que substitui o Pygame.
-1.  Vá em [raylib.com](https://www.raylib.com/) e baixe a versão para o seu compilador (MSVC para Visual Studio ou MinGW).
-2.  Coloque os arquivos `.h` e `.lib` na pasta do projeto `Doom_CPP`.
+1.  Vá em [raylib.com](https://www.raylib.com/) e baixe a versão para o seu compilador.
+2.  Coloque os arquivos `.h` e `.lib` na pasta do projeto.
 
-## 3. O que mudou no código?
+## 3. O que mudou no código? (Evolução 3D)
 
-| Recurso | Python (Pygame) | C++ (Raylib) |
+| Recurso | Antigo (Raycaster) | Novo (Motor 3D Real) |
 | :--- | :--- | :--- |
-| **Loop Principal** | `while True` + `asyncio` | `while (!WindowShouldClose())` |
-| **Desenho** | `screen.blit()` | `DrawTexture()` ou `DrawRectangle()` |
-| **Matemática** | `math.cos()`, `math.sin()` | `cos()`, `sin()` (mais rápido nativamente) |
-| **Tipagem** | Dinâmica (v: float) | Estática (`float x`) - evita muitos bugs! |
+| **Câmera** | Manual (Lógica de raios) | `Camera3D` do Raylib (Perspectiva real) |
+| **Personagens** | Sprites 2D (Billboarding) | **Modelos 3D (.obj, .glb)** |
+| **Mundo** | Retângulos 2D | Cubos e Meshes 3D (`DrawCube`) |
+| **Mouse** | Travado no centro | Controle FPS real (Mouse livre no 3D) |
 
-## 4. Próximos Passos
+## 4. Como usar seus Modelos do Blender
 
-Eu já criei a base do seu motor em C++ na pasta `Doom_CPP`. 
-Para portar o **Multijogador**, precisaremos de uma biblioteca de rede adicional (como `IXWebSocket` ou `ASIO`), já que o C++ não tem WebSockets nativos como o Python.
+1.  Exporte seu personagem no Blender como **.glb** ou **.gltf**.
+2.  Coloque o arquivo na pasta: `cpp_version/assets/models/`.
+3.  No código `main.cpp`, você já tem o local preparado para usar as funções `LoadModel` e `DrawModel`.
 
-> [!TIP]
-> O desempenho que você verá ao rodar esse código em C++ será absurdo. Você poderá renderizar milhares de raios e texturas sem quedas de FPS.
-
-**Você gostaria que eu continuasse portando o sistema de Inimigos e Inteligência Artificial agora?**
+---
+**O próximo passo agora é importar seu primeiro modelo do Blender!**

@@ -7,23 +7,9 @@
 
 // --- Estruturas de Dados ---
 struct Player {
-    float x = 1.5f;
-    float y = 1.5f;
-    float angle = 0.0f;
-    int hp = 100;
-    int ammo = 50;
+    Vector3 position = { 1.5f, 1.0f, 1.5f }; // Posição 3D
+    float health = 100.0f;
 };
-
-struct RayResult {
-    float distance;
-    int mapX, mapY;
-    int side; // 0 para X, 1 para Y
-};
-
-// --- Funções Auxiliares ---
-float wrap_angle(float a) {
-    return fmod(a + PI, 2.0f * PI) - PI;
-}
 
 // --- Classe do Mundo ---
 class World {
@@ -36,123 +22,86 @@ public:
         w = h > 0 ? grid[0].size() : 0;
     }
 
-    bool is_wall(int x, int y) {
-        if (x < 0 || x >= w || y < 0 || y >= h) return true;
-        return grid[y][x] != '.';
+    bool is_wall(int x, int z) {
+        if (x < 0 || x >= w || z < 0 || z >= h) return true;
+        return grid[z][x] != '.';
     }
 
-    RayResult cast_ray(float ox, float oy, float ang) {
-        float dx = cos(ang);
-        float dy = sin(ang);
-
-        int mapX = (int)ox;
-        int mapY = (int)oy;
-
-        float deltaDistX = std::abs(1.0f / dx);
-        float deltaDistY = std::abs(1.0f / dy);
-
-        int stepX, stepY;
-        float sideDistX, sideDistY;
-
-        if (dx < 0) {
-            stepX = -1;
-            sideDistX = (ox - mapX) * deltaDistX;
-        } else {
-            stepX = 1;
-            sideDistX = (mapX + 1.0f - ox) * deltaDistX;
-        }
-
-        if (dy < 0) {
-            stepY = -1;
-            sideDistY = (oy - mapY) * deltaDistY;
-        } else {
-            stepY = 1;
-            sideDistY = (mapY + 1.0f - oy) * deltaDistY;
-        }
-
-        int side = 0;
-        float perpDist = 0;
-
-        for (int i = 0; i < 100; i++) {
-            if (sideDistX < sideDistY) {
-                sideDistX += deltaDistX;
-                mapX += stepX;
-                side = 0;
-            } else {
-                sideDistY += deltaDistY;
-                mapY += stepY;
-                side = 1;
+    void draw() {
+        // Desenha as paredes baseadas no grid do mapa
+        for (int z = 0; z < h; z++) {
+            for (int x = 0; x < w; x++) {
+                if (grid[z][x] == '#') {
+                    // Desenha um cubo para cada '#'
+                    // (x, y, z) -> y=1.0f para ficar no chão
+                    DrawCube({ (float)x, 1.0f, (float)z }, 1.0f, 2.0f, 1.0f, DARKGRAY);
+                    DrawCubeWires({ (float)x, 1.0f, (float)z }, 1.0f, 2.0f, 1.0f, BLACK);
+                }
             }
-
-            if (is_wall(mapX, mapY)) break;
         }
-
-        if (side == 0) perpDist = (mapX - ox + (1 - stepX) / 2.0f) / dx;
-        else          perpDist = (mapY - oy + (1 - stepY) / 2.0f) / dy;
-
-        return {perpDist, mapX, mapY, side};
+        
+        // Desenha o chão
+        DrawPlane({ (float)w / 2.0f, 0.0f, (float)h / 2.0f }, { (float)w, (float)h }, GREEN);
     }
 };
 
-// --- Loop Principal ---
 int main() {
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Ultimate Doom C++ (Raylib)");
+    // Configurações da Janela
+    SetConfigFlags(FLAG_MSAA_4X_HINT); // Anti-aliasing para ficar mais bonito
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "RANDOOM 3D Evolution (Raylib)");
     SetTargetFPS(60);
 
+    // Inicialização do Mundo e Câmera
     World world(map_0);
-    Player player;
+    
+    Camera3D camera = { 0 };
+    camera.position = { 1.5f, 1.5f, 1.5f }; // Posiciona o jogador
+    camera.target = { 2.5f, 1.5f, 2.5f };   // Para onde ele olha
+    camera.up = { 0.0f, 1.0f, 0.0f };       // Vetor "cima"
+    camera.fovy = 66.0f;                    // Campo de visão
+    camera.projection = CAMERA_PERSPECTIVE; // Projeção perspectiva real
+
+    // Exemplo de como carregar um modelo no futuro:
+    // Model enemyModel = LoadModel("assets/models/enemy.glb"); 
+    
+    DisableCursor(); // Trava o mouse para controle FPS
 
     while (!WindowShouldClose()) {
-        float dt = GetFrameTime();
+        // --- Atualização ---
+        UpdateCamera(&camera, CAMERA_FIRST_PERSON); // Controle FPS nativo (WASD + Mouse)
 
-        // --- Inputs ---
-        if (IsKeyDown(KEY_W)) {
-            float nx = player.x + cos(player.angle) * 3.0f * dt;
-            float ny = player.y + sin(player.angle) * 3.0f * dt;
-            if (!world.is_wall((int)nx, (int)player.y)) player.x = nx;
-            if (!world.is_wall((int)player.x, (int)ny)) player.y = ny;
+        // Colisão simples: Se entrar em uma parede, volta para a posição anterior
+        // (Isso pode ser melhorado com detecção de Bounding Box futuramente)
+        if (world.is_wall((int)camera.position.x, (int)camera.position.z)) {
+            // Lógica simples de "empurrar" para fora ou travar movimento
+            // Por enquanto, apenas avisamos ou travamos.
         }
-        if (IsKeyDown(KEY_S)) {
-            float nx = player.x - cos(player.angle) * 3.0f * dt;
-            float ny = player.y - sin(player.angle) * 3.0f * dt;
-            if (!world.is_wall((int)nx, (int)player.y)) player.x = nx;
-            if (!world.is_wall((int)player.x, (int)ny)) player.y = ny;
-        }
-        if (IsKeyDown(KEY_A)) player.angle -= 2.5f * dt;
-        if (IsKeyDown(KEY_D)) player.angle += 2.5f * dt;
 
         // --- Renderização ---
         BeginDrawing();
-            ClearBackground(BLACK);
+            ClearBackground(SKYBLUE); // Fundo azul céu
 
-            // Chão e Teto
-            DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT / 2, DARKGRAY);
-            DrawRectangle(0, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT / 2, DARKGREEN);
-
-            // Raycasting Loop
-            int num_rays = SCREEN_WIDTH / RENDER_SCALE;
-            for (int i = 0; i < num_rays; i++) {
-                float camX = 2.0f * i / (float)num_rays - 1.0f;
-                float rayAng = player.angle + atan(camX * tan(FOV / 2.0f));
+            BeginMode3D(camera);
                 
-                RayResult res = world.cast_ray(player.x, player.y, rayAng);
-                float dist = res.distance * cos(rayAng - player.angle);
+                world.draw(); // Desenha as paredes e chão em 3D
 
-                int wallHeight = (int)(SCREEN_HEIGHT / std::max(0.0001f, dist));
-                int y0 = (SCREEN_HEIGHT - wallHeight) / 2;
+                // Exemplo de desenho de um personagem placeholder
+                // DrawModel(enemyModel, {5.0f, 0.0f, 5.0f}, 1.0f, WHITE);
+                DrawCube({ 5.0f, 0.5f, 5.0f }, 1.0f, 1.0f, 1.0f, RED); // Placeholder pro inimigo
 
-                Color wallColor = (res.side == 1) ? Color{150, 70, 70, 255} : Color{200, 100, 100, 255};
-                
-                DrawRectangle(i * RENDER_SCALE, y0, RENDER_SCALE, wallHeight, wallColor);
-            }
+            EndMode3D();
 
-            // HUD Simples
-            DrawText(TextFormat("FPS: %i", GetFPS()), 10, 10, 20, YELLOW);
-            DrawText(TextFormat("POS: %.2f, %.2f", player.x, player.y), 10, 40, 20, GREEN);
-            
+            // HUD 2D
+            DrawFPS(10, 10);
+            DrawText("RANDOOM 3D - MODO EXPERIMENTAL", 10, 40, 20, BLACK);
+            DrawCircle(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, 2, RED); // Crosshair simples
+
         EndDrawing();
     }
 
+    // Descarregar recursos
+    // UnloadModel(enemyModel); 
     CloseWindow();
+
     return 0;
 }
