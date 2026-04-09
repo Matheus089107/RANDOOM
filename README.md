@@ -8,8 +8,10 @@ Bem-vindo ao **RANDOOM**, um projeto de tiro em primeira pessoa inspirado no cl�
 
 ## 👥 Desenvolvedores
 
--   **Matheus**: Idealização, lógica do motor, renderização e gráficos.
--   **Eduardo**: Direção de arte, criação de personagens, imagens e assets visuais.
+O **RANDOOM** é fruto de uma colaboração focada em recriar a essência dos shooters clássicos com tecnologias modernas.
+
+*   **Matheus (Engine & Core)**: Responsável pela idealização do projeto, arquitetura do motor raycaster 2.5D, lógica de renderização de alta performance, e desenvolvimento dos sistemas de física e combate.
+*   **Eduardo (Art & Visuals)**: Responsável pela direção de arte e identidade visual. Deu vida ao projeto através da criação de personagens, design de assets, texturas ambientais e animações que compõem a atmosfera do jogo.
 
 ---
 
