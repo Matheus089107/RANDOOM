@@ -695,13 +695,16 @@ class Game:
 
     def _net_init(self):
         """Inicializa o WebSocket no navegador (chamado uma vez ao entrar na sala)"""
-        uri = "wss://doom-multiplayer.onrender.com"
         try:
             from platform import window
             window.eval(f"""
                 console.log('[NET] Inicializando WebSocket...');
                 if (window.doom_ws) window.doom_ws.close();
-                window.doom_ws = new WebSocket('{uri}');
+                
+                let ws_protocol = (window.location.protocol === 'https:') ? 'wss://' : 'ws://';
+                let ws_uri = ws_protocol + window.location.host + '/ws';
+                
+                window.doom_ws = new WebSocket(ws_uri);
                 window.doom_msg_queue = [];
                 window.doom_is_ready = false;
                 window.doom_ws.onopen = () => {{
