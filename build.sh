@@ -4,6 +4,9 @@ set -e
 # Instalar dependências
 pip install -r requirements.txt
 
+# Remover builds antigos para evitar que o arquivo final fique gigante
+rm -rf build
+
 # Gerar o site estático do jogo com Pygbag
 python -m pygbag --build .
 
