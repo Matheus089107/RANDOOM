@@ -75,7 +75,10 @@ async def websocket_handler(request):
     return ws
 
 async def index_handler(request):
-    return web.FileResponse('./build/web/index.html')
+    path = os.path.join(os.getcwd(), 'build', 'web', 'index.html')
+    if os.path.exists(path):
+        return web.FileResponse(path)
+    return web.Response(text="Erro: build/web/index.html não encontrado no servidor!", status=404)
 
 async def init_app():
     app = web.Application()
@@ -87,13 +90,21 @@ async def init_app():
     app.router.add_get('/', index_handler)
     
     # 3. Servir arquivos criados pelo Pygbag em build/web
-    build_dir = './build/web'
+    base_dir = os.getcwd()
+    build_dir = os.path.join(base_dir, 'build', 'web')
+    
+    print(f"DEBUG: Verificando diretório de build em: {build_dir}")
     if os.path.exists(build_dir):
-        app.router.add_static('/', build_dir)
+        print(f"DEBUG: Diretório encontrado! Servindo arquivos estáticos de {build_dir}")
+        # Usamos show_index=False por segurança
+        app.router.add_static('/', build_dir, show_index=False)
+    else:
+        print(f"ERROR: Diretório {build_dir} NÃO ENCONTRADO! O jogo não vai carregar.")
         
     return app
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
-    print(f"Servidor de Doom Multiplayer (AIOHTTP Frontend + Backend) Iniciando na porta {port}...")
+    print(f"Iniciando Servidor na porta {port}...")
+    print(f"Pasta Atual (CWD): {os.getcwd()}")
     web.run_app(init_app(), port=port)
