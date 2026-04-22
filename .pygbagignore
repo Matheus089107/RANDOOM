@@ -5,8 +5,8 @@ __pycache__
 *.pyc
 .gitignore
 .antigravityignore
-cpp_version
-deploy.ps1
+.venv
+venv
 test_server.py
 extract_gifs.py
 README.md
