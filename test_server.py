@@ -3,7 +3,7 @@ import websockets
 import json
 
 async def test_room():
-    uri = "wss://doom-multiplayer.onrender.com"
+    uri = "wss://doom-multiplayer.onrender.com/ws"
     room = "9999"
     
     print(f"Conectando ao servidor: {uri}")
