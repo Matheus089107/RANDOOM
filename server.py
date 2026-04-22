@@ -82,11 +82,10 @@ async def index_handler(request):
 
 @web.middleware
 async def cross_origin_middleware(request, handler):
-    response = await handler(request)
-    if isinstance(response, web.StreamResponse):
-        response.headers['Cross-Origin-Opener-Policy'] = 'same-origin'
-        response.headers['Cross-Origin-Embedder-Policy'] = 'require-corp'
-    return response
+    resp = await handler(request)
+    resp.headers['Cross-Origin-Opener-Policy'] = 'same-origin'
+    resp.headers['Cross-Origin-Embedder-Policy'] = 'credentialless'
+    return resp
 
 async def init_app():
     app = web.Application(middlewares=[cross_origin_middleware])
