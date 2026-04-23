@@ -80,15 +80,8 @@ async def index_handler(request):
         return web.FileResponse(path)
     return web.Response(text="Erro: build/web/index.html não encontrado no servidor!", status=404)
 
-@web.middleware
-async def cross_origin_middleware(request, handler):
-    resp = await handler(request)
-    resp.headers['Cross-Origin-Opener-Policy'] = 'same-origin'
-    resp.headers['Cross-Origin-Embedder-Policy'] = 'credentialless'
-    return resp
-
 async def init_app():
-    app = web.Application(middlewares=[cross_origin_middleware])
+    app = web.Application()
     
     # 1. Rota WebSocket
     app.router.add_get('/ws', websocket_handler)
