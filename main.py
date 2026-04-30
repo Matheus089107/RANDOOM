@@ -1500,6 +1500,9 @@ class Game:
             # A profundidade para o Z-buffer deve ser a distância perpendicular (corrigida)
             sprite_wd = dist * math.cos(rel)
             
+            # FIX CRÍTICO: Previne ZeroDivisionError e OutOfMemory ao tentar renderizar coisas muito perto
+            if dist < 0.2: continue
+            
             if abs(rel) > self.fov * 0.8: continue
 
             pt_x = (0.5 + rel / self.fov) * self.W + sx
