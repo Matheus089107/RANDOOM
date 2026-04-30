@@ -1,7 +1,13 @@
 import os
 import json
 import asyncio
+import mimetypes
 from aiohttp import web
+
+# Previne o aiohttp de adicionar Content-Encoding: gzip nos arquivos do Pygbag
+# Isso evita que o navegador descompacte os arquivos antes da engine do jogo.
+if '.gz' in mimetypes.encodings_map:
+    del mimetypes.encodings_map['.gz']
 
 # Dicionários de estado global
 rooms = {}
