@@ -843,6 +843,10 @@ class Game:
                 self.net_debug_logs.append("STATE: PLAY OK")
             except Exception as e:
                 self.net_debug_logs.append(f"ERR START: {str(e)[:15]}")
+        elif msg_type == "portal_entered":
+            if getattr(self, "is_host", False):
+                # O cliente passou de fase, então o host avança todos!
+                self._next_level()
         elif msg_type == "hit":
             idx = data.get("idx")
             dmg = data.get("dmg")
@@ -1221,7 +1225,16 @@ class Game:
         if self.portal_pos:
             if math.hypot(self.player.x - self.portal_pos[0], self.player.y - self.portal_pos[1]) < 0.6:
                 if self.player_has_key:
-                    self._next_level()
+                    if getattr(self, "is_host", False) or not getattr(self, "room_code", ""):
+                        self._next_level()
+                    else:
+                        # Cliente: avisa o Host para avançar de nível e remover a chave localmente
+                        self.player_has_key = False
+                        self.portal_pos = None
+                        if getattr(self, "ws", False):
+                            self.ws_send({"type": "portal_entered", "room": self.room_code})
+                        else:
+                            self._next_level()
 
         for p in self.particles[:]:
             p.x += p.vx * dt
