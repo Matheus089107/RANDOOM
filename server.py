@@ -80,8 +80,15 @@ async def index_handler(request):
         return web.FileResponse(path)
     return web.Response(text="Erro: build/web/index.html não encontrado no servidor!", status=404)
 
+@web.middleware
+async def add_coop_coep_headers(request, handler):
+    response = await handler(request)
+    response.headers['Cross-Origin-Opener-Policy'] = 'same-origin'
+    response.headers['Cross-Origin-Embedder-Policy'] = 'require-corp'
+    return response
+
 async def init_app():
-    app = web.Application()
+    app = web.Application(middlewares=[add_coop_coep_headers])
     
     # 1. Rota WebSocket
     app.router.add_get('/ws', websocket_handler)
