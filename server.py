@@ -84,7 +84,7 @@ async def index_handler(request):
 async def add_coop_coep_headers(request, handler):
     response = await handler(request)
     response.headers['Cross-Origin-Opener-Policy'] = 'same-origin'
-    response.headers['Cross-Origin-Embedder-Policy'] = 'require-corp'
+    response.headers['Cross-Origin-Embedder-Policy'] = 'credentialless'
     return response
 
 async def init_app():
