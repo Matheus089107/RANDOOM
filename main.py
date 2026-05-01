@@ -1125,7 +1125,14 @@ class Game:
                     if event.key == pygame.K_2 and self.level >= 4: self.player.weapon_idx = 1
                     if event.key == pygame.K_TAB: self._use_medkit()
                     if event.key == pygame.K_SPACE: self._throw_grenade()
-                    if event.key == pygame.K_RETURN: self._next_level()
+                    if event.key == pygame.K_RETURN:
+                        if getattr(self, "is_host", False) or not getattr(self, "room_code", ""):
+                            self._next_level()
+                        else:
+                            if getattr(self, "ws", False):
+                                self.ws_send({"type": "portal_entered", "room": self.room_code})
+                            else:
+                                self._next_level()
                     if event.key == pygame.K_r: self.player.ammo = min(200, self.player.ammo + 25)
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if not self.mouse_look and getattr(sys, 'platform', '').startswith('emscripten'):
