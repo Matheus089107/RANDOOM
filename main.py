@@ -524,7 +524,7 @@ class Game:
         ]
         return themes[self.map_idx % len(themes)]
 
-    def _next_level(self):
+    def _next_level(self, target_map_idx=None):
         self.level += 1
         
         # FIX Crítico de Sincronização: Força o jogador temporariamente para a origem 
@@ -550,8 +550,14 @@ class Game:
             should_switch = True
         elif self.level > 16 and (self.level - 1) % 5 == 0:
             should_switch = True
-        
-        if should_switch:
+            
+        if target_map_idx is not None:
+            if self.map_idx != target_map_idx:
+                should_switch = True
+                self.map_idx = target_map_idx
+            else:
+                should_switch = False
+        elif should_switch:
             self.map_idx = (self.map_idx + 1) % len(self.maps)
             
             # Switch textures based on map
@@ -837,8 +843,7 @@ class Game:
             try:
                 self.game_state = "PLAY"
                 self.level = h_level - 1
-                self.map_idx = h_map
-                self._next_level() # Isso vai setar o level para host_level
+                self._next_level(target_map_idx=h_map) # Agora o host dita qual o mapa correto!
                 self.player.x, self.player.y = 1.5, 1.5
                 self.net_debug_logs.append("STATE: PLAY OK")
             except Exception as e:
