@@ -560,6 +560,7 @@ class Game:
         elif should_switch:
             self.map_idx = (self.map_idx + 1) % len(self.maps)
             
+        if should_switch:
             # Switch textures based on map
             if self.map_idx == 1:
                 self.tex_wall = self.tex_wall_jungle
@@ -574,7 +575,7 @@ class Game:
                 self.tex_floor = self.tex_floor_def
                 self.tex_ceiling = self.tex_ceiling_def
 
-            self.world = World(self.maps[self.map_idx])
+            self.world = World(self.maps[self.map_idx % len(self.maps)])
             self.player.x, self.player.y = 1.5, 1.5
             self._respawn_items()
 
