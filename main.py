@@ -325,8 +325,21 @@ def generate_textures():
     p_idle, p_shoot, p_icon = load_wep("PistolIdle.png", "PistolShotting.png", "PistolPrint.png")
     s_idle, s_shoot, s_icon = load_wep("ShotgunIdle.png", "ShotgunShotting.png", "ShotgunPrint.png")
 
+    # --- Player textures ---
+    player_sprites = {}
+    try:
+        p_dir = os.path.join(img_dir, "player")
+        for name in ["front", "front_right", "right", "back_right", "back", "back_left", "left", "front_left"]:
+            p_path = os.path.join(p_dir, f"{name}.png")
+            if os.path.exists(p_path):
+                player_sprites[name] = pygame.image.load(p_path).convert_alpha()
+            else:
+                player_sprites[name] = enemy_tex # Fallback
+    except Exception as e:
+        print(f"Error loading player sprites: {e}")
+
     return (wall_tex, tex_enemy_frames, tex_boss_frames, tex_death_frames, medkit_tex, p_idle, p_shoot, p_icon, s_idle, s_shoot, s_icon, floor_tex, ceiling_tex,
-            wall_tex_jungle, tex_enemy_v2_frames, tex_boss_v2_frames, floor_tex_jungle, ceiling_tex_jungle, tex_portal_frames, tex_portal_red_frames, key_tex, grenade_tex)
+            wall_tex_jungle, tex_enemy_v2_frames, tex_boss_v2_frames, floor_tex_jungle, ceiling_tex_jungle, tex_portal_frames, tex_portal_red_frames, key_tex, grenade_tex, player_sprites)
 
 class Game:
     def __init__(self) -> None:
@@ -356,7 +369,7 @@ class Game:
         (self.tex_wall_def, self.tex_enemy_def, self.tex_boss_def, self.tex_death_frames, self.tex_medkit, 
          self.p_idle, self.p_shoot, self.p_icon, self.s_idle, self.s_shoot, self.s_icon, self.tex_floor_def, self.tex_ceiling_def,
          self.tex_wall_jungle, self.tex_enemy_v2, self.tex_boss_v2, self.tex_floor_jungle, self.tex_ceiling_jungle,
-         self.tex_portal, self.tex_portal_red, self.tex_key, self.tex_grenade) = generate_textures()
+         self.tex_portal, self.tex_portal_red, self.tex_key, self.tex_grenade, self.tex_player_sprites) = generate_textures()
         print("Textures completed.")
         
         self.tex_wall = self.tex_wall_def
@@ -1517,11 +1530,12 @@ class Game:
         sprites += [(math.hypot(it.x-px, it.y-py), it.x, it.y, it) for it in self.items if it.active]
         
         for p_id, p_data in self.other_players.items():
-            sprites.append((math.hypot(p_data["x"]-px, p_data["y"]-py), p_data["x"], p_data["y"], "player"))
+            sprites.append((math.hypot(p_data["x"]-px, p_data["y"]-py), p_data["x"], p_data["y"], "player", p_data))
 
         sprites.sort(key=lambda t: -t[0])
 
-        for dist, ex, ey, obj in sprites:
+        for dist, ex, ey, obj, *extra in sprites:
+            obj_data = extra[0] if extra else None
             rel = wrap_angle(math.atan2(ey - py, ex - px) - pa)
             # A profundidade para o Z-buffer deve ser a distância perpendicular (corrigida)
             sprite_wd = dist * math.cos(rel)
@@ -1560,16 +1574,20 @@ class Game:
                     tex = self.tex_portal[f_idx] if self.player_has_key else self.tex_portal_red[f_idx]
                     scale = 2.0
                 elif obj == "player":
-                    # Recria a skin do jogador sempre (para evitar bugs de cache em trocas de mapa)
-                    base_surf = getattr(self, "tex_enemy_frames", [None])[0]
-                    if base_surf:
-                        self.tex_player_cache = base_surf.copy()
-                        tint = pygame.Surface(self.tex_player_cache.get_size(), pygame.SRCALPHA)
-                        tint.fill((0, 255, 100, 160)) # Verde vibrante
-                        self.tex_player_cache.blit(tint, (0,0), special_flags=pygame.BLEND_RGBA_ADD)
-                        tex = self.tex_player_cache
-                    else:
-                        tex = self.tex_wall # Fallback
+                    p_data = obj_data
+                    # Calcular angulo relativo para escolher o sprite
+                    ang_to_me = math.atan2(py - ey, px - ex)
+                    diff = wrap_angle(p_data["ang"] - ang_to_me)
+                    
+                    # 0=Frente, pi=Costas
+                    # Mapeamento 8-direcional
+                    names = ["front", "front_left", "left", "back_left", "back", "back_right", "right", "front_right"]
+                    idx = int((diff + math.pi + math.pi/8) / (math.pi/4)) % 8
+                    # Ajuste de indice: no calculo acima 0 eh costas (pi), 4 eh frente (0)
+                    # Queremos 0 = frente, 4 = costas
+                    idx = (idx + 4) % 8
+                    
+                    tex = self.tex_player_sprites.get(names[idx], self.tex_wall)
                     scale = 0.8
                 
                 hw, hh = size * 0.7 * scale, size * 0.7 * scale
